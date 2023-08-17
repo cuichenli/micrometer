@@ -29,6 +29,7 @@ import org.mockito.InOrder;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -85,7 +86,12 @@ public abstract class ObservationRegistryCompatibilityKit {
 
             Observation.Event event = Observation.Event.of("testEvent", "event for testing");
             observation.event(event);
+            Observation.Event event2 = Observation.Event.of("testEvent", "event for testing",
+                    System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+            observation.event(event2);
+
             inOrder.verify(handler).onEvent(same(event), isA(Observation.Context.class));
+            inOrder.verify(handler).onEvent(same(event2), isA(Observation.Context.class));
 
             Throwable exception = new IOException("simulated");
             observation.error(exception);

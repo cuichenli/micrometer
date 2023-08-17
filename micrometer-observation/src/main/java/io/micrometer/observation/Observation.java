@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -1272,6 +1273,8 @@ public interface Observation extends ObservationView {
          */
         static Event of(String name, String contextualName) {
             return new Event() {
+                private final long timestamp = System.currentTimeMillis();
+
                 @Override
                 public String getName() {
                     return name;
@@ -1283,8 +1286,61 @@ public interface Observation extends ObservationView {
                 }
 
                 @Override
+                public long getTimestamp() {
+                    return this.timestamp;
+                }
+
+                @Override
+                public TimeUnit getTimestampTimeUnit() {
+                    return TimeUnit.MILLISECONDS;
+                }
+
+                @Override
                 public String toString() {
-                    return "event.name='" + getName() + "', event.contextualName='" + getContextualName() + '\'';
+                    return "event.name='" + getName() + "', event.contextualName='" + getContextualName()
+                            + "', event.timestamp=" + getTimestamp() + ", event.timestampTimeUnit="
+                            + getTimestampTimeUnit();
+                }
+            };
+        }
+
+        /**
+         * Creates an {@link Event} for the given names and timestamp.
+         * @param name The name of the event (should have low cardinality).
+         * @param contextualName The contextual name of the event (can have high
+         * cardinality).
+         * @param time Value of time
+         * @param timeUnit Time unit in which value of time was provided
+         * @return event
+         */
+        static Event of(String name, String contextualName, long time, TimeUnit timeUnit) {
+            return new Event() {
+
+                @Override
+                public String getName() {
+                    return name;
+                }
+
+                @Override
+                public String getContextualName() {
+                    return contextualName;
+                }
+
+                @Override
+                public long getTimestamp() {
+                    return time;
+                }
+
+                @Override
+                public TimeUnit getTimestampTimeUnit() {
+                    return timeUnit;
+                }
+
+                @Override
+                public String toString() {
+                    return "event.name='" + getName() + "', event.contextualName='" + getContextualName()
+                            + "', event.timestamp=" + getTimestamp() + ", event.timestampTimeUnit="
+                            + getTimestampTimeUnit();
                 }
             };
         }
@@ -1303,6 +1359,22 @@ public interface Observation extends ObservationView {
          * @return the name of the event.
          */
         String getName();
+
+        /**
+         * Returns the timestamp of the event.
+         * @return the timestamp of the event
+         */
+        default long getTimestamp() {
+            return 0L;
+        }
+
+        /**
+         * Returns the timestamp unit.
+         * @return the timestamp unit
+         */
+        default TimeUnit getTimestampTimeUnit() {
+            return TimeUnit.MILLISECONDS;
+        }
 
         /**
          * Returns the contextual name of the event. You can use {@code %s} to represent
