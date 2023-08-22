@@ -200,6 +200,7 @@ dependencies {
     // gRPC
     testImplementation("io.grpc:grpc-core")
     testImplementation("io.grpc:grpc-testing-proto")
+    testImplementation 'com.squareup.retrofit2:retrofit'
 }
 
 task shenandoahTest(type: Test) {
